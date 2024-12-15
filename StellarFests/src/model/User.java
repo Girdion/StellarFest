@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Vector;
 import util.Database;
+import util.UserSession;
 
 public class User {
 	private String user_id;
@@ -133,6 +134,7 @@ public class User {
 	    // Validate the user credentials (this connects to the database or service)
 	    User validatedUser = validateUserCredentials(email, password);  // Use email instead of username
 	    if (validatedUser != null) {
+	    	 UserSession.setLoggedInUser(validatedUser);
 	        return validatedUser.getRole();  // Return the role of the validated user (e.g., "admin", "guest", etc.)
 	    } else {
 	        return "Invalid email or password. Please try again.";  // Return an error if credentials are incorrect

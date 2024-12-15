@@ -48,7 +48,8 @@ public class PageController {
 
     // Navigate to Event Organizer Page
     public void navigateToEventOrganizer() {
-        EventOrganizerPage organizerPage = new EventOrganizerPage();
+    	EventOrganizerController eventController = new EventOrganizerController();
+        EventOrganizerPage organizerPage = new EventOrganizerPage(primaryStage, this, eventController);
         currentScene = organizerPage.getScene();
         primaryStage.setScene(currentScene);
         primaryStage.setTitle("Event Organizer Dashboard");

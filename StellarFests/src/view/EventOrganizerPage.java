@@ -1,15 +1,215 @@
 package view;
 
+import controller.EventOrganizerController;
+import controller.PageController;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.stage.Stage;
+import util.UserSession;
 
-public class EventOrganizerPage {
+import java.util.Vector;
 
-	public EventOrganizerPage() {
-		// TODO Auto-generated constructor stub
-	}
-	
-	public Scene getScene() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+public class EventOrganizerPage implements EventHandler<ActionEvent> {
+
+    private Scene scene;
+    private Stage stage;
+    private VBox container;
+    private GridPane grid;
+    private Label titleLbl, eventNameLbl, eventDateLbl, eventLocationLbl, eventDescriptionLbl, eventIDLbl;
+    private TextField eventNameField, eventLocationField, eventDescriptionField;
+    private DatePicker eventDatePicker;
+    private Button createEventBtn, viewEventsBtn, addVendorsBtn, addGuestsBtn, editEventBtn;
+    private ComboBox<String> eventIDComboBox;
+    private Label eventErrorLbl, vendorsErrorLbl, guestsErrorLbl;
+    private Label userGreetingLbl;
+
+
+    private PageController pageController;
+    private EventOrganizerController eventOrganizerController;
+    
+    private UserSession userSession;
+
+    public EventOrganizerPage(Stage stage, PageController pageController, EventOrganizerController eventOrganizerController) {
+        this.stage = stage;
+        this.pageController = pageController;
+        this.eventOrganizerController = eventOrganizerController;
+        initComponent();
+        initPosition();
+    }
+    // Initialize the page
+    public void show() {
+        this.stage.setTitle("Event Organizer Page");
+        this.stage.setScene(scene);
+        this.stage.show();
+    }
+
+    private void initPosition() {
+        container.getChildren().add(userGreetingLbl); // Add the user greeting label at the top
+        grid.add(eventNameLbl, 0, 0);
+        grid.add(eventNameField, 1, 0);
+        grid.add(eventErrorLbl, 1, 1); // Position error label below event name field
+
+        grid.add(eventDateLbl, 0, 2);
+        grid.add(eventDatePicker, 1, 2);
+
+        grid.add(eventLocationLbl, 0, 3);
+        grid.add(eventLocationField, 1, 3);
+
+        grid.add(eventDescriptionLbl, 0, 4);
+        grid.add(eventDescriptionField, 1, 4);
+
+        grid.add(viewEventsBtn, 0, 5);
+        grid.add(createEventBtn, 1, 5);
+
+        container.getChildren().addAll(titleLbl, grid, addVendorsBtn, addGuestsBtn, editEventBtn);
+        VBox.setMargin(addVendorsBtn, new Insets(20, 0, 10, 0));
+        VBox.setMargin(addGuestsBtn, new Insets(0, 0, 10, 0));
+        VBox.setMargin(editEventBtn, new Insets(0, 0, 10, 0));
+    }
+
+
+    private void initComponent() {
+        container = new VBox(10);
+        container.setPadding(new Insets(20));
+        container.setAlignment(Pos.TOP_CENTER);
+
+        grid = new GridPane();
+        grid.setAlignment(Pos.CENTER);
+        grid.setPadding(new Insets(10));
+        grid.setHgap(10);
+        grid.setVgap(10);
+
+        titleLbl = new Label("Event Organizer Dashboard");
+        titleLbl.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
+        
+        userGreetingLbl = new Label("Hello, " + UserSession.getLoggedInUser().getUsername() + "!");
+        userGreetingLbl.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+
+        eventNameLbl = new Label("Event Name:");
+        eventDateLbl = new Label("Event Date:");
+        eventLocationLbl = new Label("Event Location:");
+        eventDescriptionLbl = new Label("Event Description:");
+        eventIDLbl = new Label("Select Event:");
+
+        eventErrorLbl = new Label();
+        eventErrorLbl.setStyle("-fx-text-fill: red; -fx-font-size: 12px;");
+
+        // Initialize fields for event creation
+        eventNameField = new TextField();
+        eventLocationField = new TextField();
+        eventDescriptionField = new TextField();
+        eventDatePicker = new DatePicker();
+
+        // Buttons for event management
+        createEventBtn = new Button("Create Event");
+        createEventBtn.setOnAction(this);
+
+        viewEventsBtn = new Button("View Organized Events");
+        viewEventsBtn.setOnAction(this);
+
+        addVendorsBtn = new Button("Add Vendors to Event");
+        addVendorsBtn.setOnAction(this);
+
+        addGuestsBtn = new Button("Add Guests to Event");
+        addGuestsBtn.setOnAction(this);
+
+        editEventBtn = new Button("Edit Event Name");
+        editEventBtn.setOnAction(this);
+
+        // ComboBox to select an event for editing
+        eventIDComboBox = new ComboBox<>();
+        eventIDComboBox.setPromptText("Select Event");
+
+        scene = new Scene(container, 600, 550);
+    }
+
+    @Override
+    public void handle(ActionEvent e) {
+        // Get the logged-in user's ID from the session
+        String organizerID = UserSession.getLoggedInUser().getUser_id();
+
+        if (e.getSource() == createEventBtn) {
+            String eventName = eventNameField.getText();
+            String eventLocation = eventLocationField.getText();
+            String eventDescription = eventDescriptionField.getText();
+            String eventDate = eventDatePicker.getValue() != null ? eventDatePicker.getValue().toString() : "";
+
+            // Clear previous error messages
+            eventErrorLbl.setText("");
+
+            // Validate input
+            String validationMessage = eventOrganizerController.checkCreateEventInput(eventName, eventDate, eventLocation, eventDescription);
+
+            if (validationMessage.equals("Validation successful")) {
+                eventOrganizerController.createEvent(eventName, eventDate, eventLocation, eventDescription, organizerID);
+                eventErrorLbl.setText("Event created successfully!");
+                eventErrorLbl.setStyle("-fx-text-fill: green;");
+
+                // Clear the form fields
+                eventNameField.clear();
+                eventLocationField.clear();
+                eventDescriptionField.clear();
+                eventDatePicker.setValue(null);
+            } else {
+                eventErrorLbl.setText(validationMessage);
+            }
+        }
+
+        if (e.getSource() == viewEventsBtn) {
+            // Show organized events (this would display event names for the event organizer)
+            Vector<String> events = eventOrganizerController.viewOrganizedEvent(organizerID);
+
+            // Populate the eventIDComboBox with event options
+            eventIDComboBox.getItems().clear();
+            eventIDComboBox.getItems().addAll(events);
+        }
+
+        if (e.getSource() == addVendorsBtn) {
+            // Logic to add vendors to selected event
+            String selectedEventID = eventIDComboBox.getSelectionModel().getSelectedItem();
+            if (selectedEventID != null) {
+                // Add vendors to the selected event
+                System.out.println("Adding vendors to event: " + selectedEventID);
+            } else {
+                eventErrorLbl.setText("Please select an event first.");
+            }
+        }
+
+        if (e.getSource() == addGuestsBtn) {
+            // Logic to add guests to selected event
+            String selectedEventID = eventIDComboBox.getSelectionModel().getSelectedItem();
+            if (selectedEventID != null) {
+                // Add guests to the selected event
+                System.out.println("Adding guests to event: " + selectedEventID);
+            } else {
+                eventErrorLbl.setText("Please select an event first.");
+            }
+        }
+
+        if (e.getSource() == editEventBtn) {
+            // Logic to edit event name
+            String selectedEventID = eventIDComboBox.getSelectionModel().getSelectedItem();
+            if (selectedEventID != null) {
+                String newEventName = eventNameField.getText();
+                if (!newEventName.isEmpty()) {
+                    eventOrganizerController.editEventName(selectedEventID, newEventName);
+                    eventErrorLbl.setText("Event name updated successfully!");
+                    eventErrorLbl.setStyle("-fx-text-fill: green;");
+                } else {
+                    eventErrorLbl.setText("Event name cannot be empty.");
+                }
+            } else {
+                eventErrorLbl.setText("Please select an event first.");
+            }
+        }
+    }
+
+    public Scene getScene() {
+        return scene;
+    }
 }
