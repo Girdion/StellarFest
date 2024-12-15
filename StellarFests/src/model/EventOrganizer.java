@@ -12,7 +12,7 @@ import java.util.UUID;
 import java.util.Vector;
 import util.Database;
 
-public class EventOrganizer {
+public class EventOrganizer extends User{
     private String event_id;
     private String event_name;
     private String event_date;
@@ -62,26 +62,31 @@ public class EventOrganizer {
     }
 
     // 2. View Organized Events
-    public Vector<String> viewOrganizedEvent(String userID) {
-        Vector<String> eventNames = new Vector<>();
-        String query = "SELECT event_name FROM events WHERE organizer_id = ?";
+    public Vector<EventOrganizer> viewOrganizedEvent(String userID) {
+        Vector<EventOrganizer> events = new Vector<>();
+        String query = "SELECT * FROM event WHERE organizer_id = ?";
         try (PreparedStatement ps = connect.prepareStatement(query)) {
             ps.setString(1, userID);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
+                String eventID = rs.getString("event_id");
                 String eventName = rs.getString("event_name");
-                eventNames.add(eventName);
+                String eventDate = rs.getString("event_date");
+                String eventLocation = rs.getString("event_location");
+                String eventDescription = rs.getString("event_description");
+                events.add(new EventOrganizer(eventID, eventName, eventDate, eventLocation, eventDescription, userID));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return eventNames;
+        return events;
     }
+
 
 
     // 3. View Event Details
     public EventOrganizer viewOrganizedEventDetails(String eventID) {
-        String query = "SELECT * FROM events WHERE event_id = ?";
+        String query = "SELECT * FROM event WHERE event_id = ?";
         try (PreparedStatement ps = connect.prepareStatement(query)) {
             ps.setString(1, eventID);
             ResultSet rs = ps.executeQuery();

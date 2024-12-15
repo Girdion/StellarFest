@@ -18,7 +18,7 @@ public class EventOrganizerController {
     }
 
     // 2. View All Organized Events
-    public Vector<String> viewOrganizedEvent(String userID) {
+    public Vector<EventOrganizer> viewOrganizedEvent(String userID) {
         return eventOrganizerModel.viewOrganizedEvent(userID);
     }
 

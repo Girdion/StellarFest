@@ -11,6 +11,8 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import util.UserSession;
+import model.Event;
+import model.EventOrganizer;
 
 import java.util.Vector;
 
@@ -27,7 +29,9 @@ public class EventOrganizerPage implements EventHandler<ActionEvent> {
     private ComboBox<String> eventIDComboBox;
     private Label eventErrorLbl, vendorsErrorLbl, guestsErrorLbl;
     private Label userGreetingLbl;
-
+    private Button editProfileBtn;
+    private Label eventDetailsTitleLbl, eventNameDetailLbl, eventDateDetailLbl, eventLocationDetailLbl, eventDescriptionDetailLbl;
+    private Label eventNameDetail, eventDateDetail, eventLocationDetail, eventDescriptionDetail;
 
     private PageController pageController;
     private EventOrganizerController eventOrganizerController;
@@ -50,6 +54,8 @@ public class EventOrganizerPage implements EventHandler<ActionEvent> {
 
     private void initPosition() {
         container.getChildren().add(userGreetingLbl); // Add the user greeting label at the top
+        container.getChildren().add(titleLbl); // Add title label after user greeting label
+        
         grid.add(eventNameLbl, 0, 0);
         grid.add(eventNameField, 1, 0);
         grid.add(eventErrorLbl, 1, 1); // Position error label below event name field
@@ -66,11 +72,23 @@ public class EventOrganizerPage implements EventHandler<ActionEvent> {
         grid.add(viewEventsBtn, 0, 5);
         grid.add(createEventBtn, 1, 5);
 
-        container.getChildren().addAll(titleLbl, grid, addVendorsBtn, addGuestsBtn, editEventBtn);
+        container.getChildren().addAll(grid, addVendorsBtn, addGuestsBtn, editEventBtn, editProfileBtn);
+        container.getChildren().add(eventDetailsTitleLbl);
+        container.getChildren().add(eventNameDetailLbl);
+        container.getChildren().add(eventNameDetail);
+        container.getChildren().add(eventDateDetailLbl);
+        container.getChildren().add(eventDateDetail);
+        container.getChildren().add(eventLocationDetailLbl);
+        container.getChildren().add(eventLocationDetail);
+        container.getChildren().add(eventDescriptionDetailLbl);
+        container.getChildren().add(eventDescriptionDetail);
+
         VBox.setMargin(addVendorsBtn, new Insets(20, 0, 10, 0));
         VBox.setMargin(addGuestsBtn, new Insets(0, 0, 10, 0));
         VBox.setMargin(editEventBtn, new Insets(0, 0, 10, 0));
+        VBox.setMargin(editProfileBtn, new Insets(0, 0, 10, 0));
     }
+
 
 
     private void initComponent() {
@@ -120,10 +138,38 @@ public class EventOrganizerPage implements EventHandler<ActionEvent> {
 
         editEventBtn = new Button("Edit Event Name");
         editEventBtn.setOnAction(this);
+        
+        editProfileBtn = new Button("Edit Profile");
+        editProfileBtn.setOnAction(this);
 
         // ComboBox to select an event for editing
         eventIDComboBox = new ComboBox<>();
         eventIDComboBox.setPromptText("Select Event");
+        
+        eventDetailsTitleLbl = new Label("Event Details");
+        eventDetailsTitleLbl.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+
+        eventNameDetailLbl = new Label("Event Name:");
+        eventDateDetailLbl = new Label("Event Date:");
+        eventLocationDetailLbl = new Label("Event Location:");
+        eventDescriptionDetailLbl = new Label("Event Description:");
+
+        eventNameDetail = new Label();
+        eventDateDetail = new Label();
+        eventLocationDetail = new Label();
+        eventDescriptionDetail = new Label();
+
+        // Initially set event details labels to be invisible
+        eventDetailsTitleLbl.setVisible(false);
+        eventNameDetailLbl.setVisible(false);
+        eventDateDetailLbl.setVisible(false);
+        eventLocationDetailLbl.setVisible(false);
+        eventDescriptionDetailLbl.setVisible(false);
+
+        eventNameDetail.setVisible(false);
+        eventDateDetail.setVisible(false);
+        eventLocationDetail.setVisible(false);
+        eventDescriptionDetail.setVisible(false);
 
         scene = new Scene(container, 600, 550);
     }
@@ -161,12 +207,7 @@ public class EventOrganizerPage implements EventHandler<ActionEvent> {
         }
 
         if (e.getSource() == viewEventsBtn) {
-            // Show organized events (this would display event names for the event organizer)
-            Vector<String> events = eventOrganizerController.viewOrganizedEvent(organizerID);
-
-            // Populate the eventIDComboBox with event options
-            eventIDComboBox.getItems().clear();
-            eventIDComboBox.getItems().addAll(events);
+            pageController.navigateToEvents();
         }
 
         if (e.getSource() == addVendorsBtn) {

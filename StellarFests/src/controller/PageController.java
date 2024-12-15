@@ -7,6 +7,10 @@ import view.EventOrganizerPage;
 import view.GuestPage;
 import view.LoginPage;
 import view.VendorPage;
+import view.ViewEventDetailsPage;
+import view.ViewEventsPage;
+import model.Event;
+import model.EventOrganizer;
 
 public class PageController {
 
@@ -64,5 +68,31 @@ public class PageController {
         primaryStage.setTitle("Vendor Dashboard");
         primaryStage.show();
     }
-   
+    
+    public void navigateToEventDetails(EventOrganizer selectedEvent) {
+        // Ensure the selected event is not null
+        if (selectedEvent == null) {
+            System.out.println("Error: Selected event is null. Cannot navigate to event details page.");
+            return;
+        }
+
+        // Create or show the event details page with the given event details
+        ViewEventDetailsPage eventDetailsPage = new ViewEventDetailsPage(primaryStage, this, selectedEvent);
+        currentScene = eventDetailsPage.getScene();
+        primaryStage.setScene(currentScene);
+        primaryStage.setTitle("Event Details Page");
+        primaryStage.show();
+    }
+    
+    public void navigateToEvents() {
+        // Create or show the ViewEventsPage
+        ViewEventsPage viewEventsPage = new ViewEventsPage(primaryStage, this);
+        currentScene = viewEventsPage.getScene(); // Get the scene from ViewEventsPage
+        primaryStage.setScene(currentScene);
+        primaryStage.setTitle("Events Page");
+        primaryStage.show();
+    }
+
+
+
 }
