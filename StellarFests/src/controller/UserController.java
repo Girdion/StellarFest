@@ -1,12 +1,15 @@
 package controller;
 
 import model.User;
+import util.Database;
+
 import java.util.Vector;
 
 public class UserController {
 
     private User userModel;
-
+    private Database connect;
+    
     public UserController() {
         userModel = new User();
     }
@@ -68,4 +71,6 @@ public class UserController {
     public User getUserByUsername(String username) {
         return userModel.getUserByName(username);
     }
+    
+ 
 }

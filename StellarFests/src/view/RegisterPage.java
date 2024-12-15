@@ -1,6 +1,5 @@
 package view;
 
-
 import javafx.event.ActionEvent;
 import controller.PageController;
 import controller.UserController;
@@ -79,8 +78,8 @@ public class RegisterPage {
 
         // ComboBox for role selection
         roleComboBox = new ComboBox<>();
-        roleComboBox.getItems().addAll("Event Organizer", "Vendor", "Guest");
-        roleComboBox.setValue("Event Organizer");
+        roleComboBox.getItems().addAll(" ", "Event Organizer", "Vendor", "Guest");
+        roleComboBox.setValue(" ");
 
         // Buttons
         regisBtn = new Button("Register");
@@ -156,7 +155,7 @@ public class RegisterPage {
                 emailField.clear();
                 usernameField.clear();
                 passwordField.clear();
-                roleComboBox.setValue("Event Organizer");
+                roleComboBox.setValue(" ");
 
                 // Show success message
                 emailErrorLbl.setText("Registration successful!");
@@ -166,15 +165,24 @@ public class RegisterPage {
                 pageController.navigateToLogin();
             } else {
                 // Handle validation errors
-                if (validationMessage.contains("Email")) {
+            	switch (validationMessage) {
+                case "Email cannot be empty.":
                     emailErrorLbl.setText(validationMessage);
-                } else if (validationMessage.contains("Username")) {
+                    break;
+                case "Username cannot be empty.":
                     usernameErrorLbl.setText(validationMessage);
-                } else if (validationMessage.contains("Password")) {
+                    break;
+                case "Password cannot be empty.":
                     passwordErrorLbl.setText(validationMessage);
-                } else if (validationMessage.contains("Role")) {
+                    break;
+                case "Please select a role.":
                     roleErrorLbl.setText(validationMessage);
-                }
+                    break;
+                default:
+                    emailErrorLbl.setText(validationMessage); // Catch any unexpected message
+                    break;
+            }
+
             }
         }
     }
