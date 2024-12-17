@@ -133,7 +133,7 @@ public class PageController {
         currentScene = editProfilePage.getScene();
         primaryStage.setScene(currentScene);
         primaryStage.setTitle("Edit Profile Page");
-        primaryStage.show();
+        primaryStage.show(); 
     }
 
 
