@@ -143,32 +143,91 @@ public class User {
 
 
 
-	// Modify other methods to align with the updated column names
-	// 2. Change Profile
-	public String changeProfile(String email, String name, String oldPassword, String newPassword) {
-		if (!validatePassword(newPassword).isEmpty()) {
-			return validatePassword(newPassword);
-		}
+	public String changeProfile(String newName, String newEmail, String oldPassword, String newPassword) {
+	    // Step 1: Validate the inputs first
+	    if (newEmail == null || newName == null || oldPassword == null || newPassword == null) {
+	        return "All fields are required.";
+	    }
 
-		String query = "UPDATE users SET name = ?, password = ? WHERE email = ? AND password = ?";  // Updated 'username' to 'name'
-		try {
-			PreparedStatement ps = connect.prepareStatement(query);
-			ps.setString(1, name);
-			ps.setString(2, newPassword);
-			ps.setString(3, email);
-			ps.setString(4, oldPassword);
-			int rowsUpdated = ps.executeUpdate();
+	    // Step 2: Get the current logged-in user from the UserSession
+	    User currentUser = UserSession.getLoggedInUser();
+	    if (currentUser == null) {
+	        return "No user is logged in.";
+	    }
 
-			if (rowsUpdated > 0) {
-				return "Profile updated successfully";
-			} else {
-				return "Update failed: Incorrect email or password";
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return "Update failed: Database error";
-		}
+	    // Check if the old password matches the current user's password
+	    if (!currentUser.getPassword().equals(oldPassword)) {
+	        return "Incorrect old password.";
+	    }
+
+	    // Step 3: Validate the email change (i.e., can't be the same as the current email)
+	    if (newEmail.equals(currentUser.getEmail())) {
+	        return "The new email must be different from the current one.";
+	    }
+
+	    // Step 4: Perform the update query with the logged-in user's email
+	    String query = "UPDATE users SET name = ?, email = ?, password = ? WHERE email = ? AND password = ?";
+	    try (PreparedStatement ps = connect.prepareStatement(query)) {
+	        // Check if the database connection is null
+	        if (connect == null) {
+	            return "Database connection is not available.";
+	        }
+
+	        // Set the parameters for the query (name, new email, new password, old email, and old password)
+	        ps.setString(1, newName);         // Set the new name
+	        ps.setString(2, newEmail);        // Set the new email
+	        ps.setString(3, newPassword);     // Set the new password
+	        ps.setString(4, currentUser.getEmail());  // Current logged-in user's email
+	        ps.setString(5, oldPassword);     // The old password entered by the user
+
+	        // Execute the update
+	        int rowsUpdated = ps.executeUpdate();
+	        if (rowsUpdated > 0) {
+	            // Update the UserSession with the new email after successful update
+	            currentUser.setEmail(newEmail);
+	            currentUser.setName(newName);
+	            currentUser.setPassword(newPassword);  // Update password as well
+
+	            return "Profile updated successfully.";
+	        } else {
+	            return "Update failed: No changes were made.";
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        return "Update failed: Database error - " + e.getMessage();
+	    }
 	}
+
+	  public void setEmail(String email) {
+	        this.email = email;
+	    }
+
+	    public void setName(String username) {
+	        this.username = username;
+	    }
+
+	    public void setPassword(String password) {
+	        this.password = password;
+	    }
+
+
+	// Method to check if the user exists with the given email and old password
+	private boolean doesUserExist(String email, String oldPassword) {
+	    String query = "SELECT COUNT(*) FROM users WHERE email = ? AND password = ?";
+	    try (PreparedStatement ps = connect.prepareStatement(query)) {
+	        ps.setString(1, email);
+	        ps.setString(2, oldPassword);
+	        ResultSet rs = ps.executeQuery();
+	        if (rs.next() && rs.getInt(1) > 0) {
+	            return true;
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+	    return false;
+	}
+
+
 
 	// 3. Get user by email
 	public User getUserByEmail(String email) {
@@ -304,21 +363,31 @@ public class User {
 		return "";
 	}
 
-	// Check if email is unique
-	private boolean isEmailUnique(String email) {
-		String query = "SELECT COUNT(*) FROM users WHERE email = ?";
-		try (PreparedStatement ps = connect.prepareStatement(query)) {
-			ps.setString(1, email);
-			ResultSet rs = ps.executeQuery();
-			if (rs.next()) {
-				int count = rs.getInt(1);
-				return count == 0;
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return false;
+	public boolean isEmailUnique(String email) {
+	    if (email == null) {
+	        throw new IllegalArgumentException("Email cannot be null");
+	    }
+
+	    if (connect == null) {
+	        throw new IllegalStateException("Database connection is not available");
+	    }
+
+	    String query = "SELECT COUNT(*) FROM users WHERE email = ?";
+	    try (PreparedStatement ps = connect.prepareStatement(query)) {
+	        ps.setString(1, email);
+	        ResultSet rs = ps.executeQuery();
+	        
+	        if (rs.next()) {
+	            int count = rs.getInt(1);
+	            return count == 0; // Email is unique if count is 0
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return false; // If any error occurs or email isn't unique
 	}
+
 
 	// Validate role
 	public String validateRole(String role) {

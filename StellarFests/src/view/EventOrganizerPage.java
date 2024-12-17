@@ -70,7 +70,7 @@ public class EventOrganizerPage implements EventHandler<ActionEvent> {
         grid.add(eventDescriptionField, 1, 4);
 
         grid.add(viewEventsBtn, 0, 5);
-        grid.add(createEventBtn, 1, 5);
+        grid.add(createEventBtn, 3, 5);
 
         container.getChildren().addAll(grid, addVendorsBtn, addGuestsBtn, editEventBtn, editProfileBtn);
         container.getChildren().add(eventDetailsTitleLbl);
@@ -247,6 +247,10 @@ public class EventOrganizerPage implements EventHandler<ActionEvent> {
             } else {
                 eventErrorLbl.setText("Please select an event first.");
             }
+        }
+        
+        if(e.getSource() == editProfileBtn) {
+        	pageController.navigateToEditProfile();
         }
     }
 

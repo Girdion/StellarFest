@@ -25,9 +25,12 @@ public class Database {
     private static Database connect;
 
     public static Database getInstance() {
-        if (connect == null) return new Database();
+        if (connect == null) {
+            connect = new Database(); // Assign the newly created instance to connect
+        }
         return connect;
     }
+
 
     private Database() {
         try {

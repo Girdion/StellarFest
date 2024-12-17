@@ -3,10 +3,14 @@ package controller;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import view.AdminPage;
+import view.DeleteUserPage;
+import view.EditProfilePage;
 import view.EventOrganizerPage;
 import view.GuestPage;
 import view.LoginPage;
 import view.VendorPage;
+import view.ViewAllEventsPage;
+import view.ViewAllUsersPage;
 import view.ViewEventDetailsPage;
 import view.ViewEventsPage;
 import model.Event;
@@ -34,7 +38,7 @@ public class PageController {
     
     // Navigate to Admin Page
     public void navigateToAdmin() {
-        AdminPage adminPage = new AdminPage();
+        AdminPage adminPage = new AdminPage(primaryStage, this, null);
         currentScene = adminPage.getScene();  // Assuming AdminPage has a getScene() method
         primaryStage.setScene(currentScene);
         primaryStage.setTitle("Admin Dashboard");
@@ -90,6 +94,45 @@ public class PageController {
         currentScene = viewEventsPage.getScene(); // Get the scene from ViewEventsPage
         primaryStage.setScene(currentScene);
         primaryStage.setTitle("Events Page");
+        primaryStage.show();
+    }
+    
+    public void navigateToAllEvents() {
+    	ViewAllEventsPage allEventsPage = new ViewAllEventsPage(primaryStage, this);
+    	currentScene = allEventsPage.getScene(); // Get the scene from ViewEventsPage
+        primaryStage.setScene(currentScene);
+        primaryStage.setTitle("All Events Page");
+        primaryStage.show();
+    }
+    
+    public void navigateToAllUsers() {
+    	ViewAllUsersPage allUsersPage = new ViewAllUsersPage(primaryStage, this);
+    	currentScene = allUsersPage.getScene();
+    	primaryStage.setScene(currentScene);
+    	primaryStage.setTitle("All Users Page");
+    	primaryStage.show();
+    }
+    
+    public void navigateToDeleteUsers() {
+    	DeleteUserPage deleteUserPage = new DeleteUserPage(primaryStage, this);
+    	currentScene = deleteUserPage.getScene();
+    	primaryStage.setScene(currentScene);
+    	primaryStage.setTitle("Delete Users Page");
+    	primaryStage.show();
+    }
+    
+    public void navigateToEditProfile() {
+        // Initialize the UserController and AdminController
+        UserController userController = new UserController();
+        AdminController adminController = new AdminController(); // If you need this, initialize it here
+
+        // Pass the initialized controllers to EditProfilePage
+        EditProfilePage editProfilePage = new EditProfilePage(primaryStage, this, adminController, userController);
+
+        // Set the scene for EditProfilePage
+        currentScene = editProfilePage.getScene();
+        primaryStage.setScene(currentScene);
+        primaryStage.setTitle("Edit Profile Page");
         primaryStage.show();
     }
 

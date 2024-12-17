@@ -37,29 +37,45 @@ public class EventOrganizer extends User{
 
     // 1. Create Event
     public String createEvent(String eventName, String date, String location, String description, String organizerID) {
-        String validationResult = checkCreateEventInput(eventName, date, location, description);
-        if (!validationResult.equals("Validation successful")) {
-            return validationResult;
+        int nextId = getNextEventId();
+        if (nextId == -1) {
+            return "Error generating event ID";
         }
 
-        // Generate a unique event ID using UUID
-        String eventId = UUID.randomUUID().toString();  // This generates a unique string for event_id
+        String eventId = String.valueOf(nextId); // Convert to string for VARCHAR compatibility
 
         String query = "INSERT INTO event (event_id, event_name, event_date, event_location, event_description, organizer_id) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = connect.prepareStatement(query)) {
-            ps.setString(1, eventId);  // Set the generated UUID as event_id
+            ps.setString(1, eventId);
             ps.setString(2, eventName);
             ps.setString(3, date);
             ps.setString(4, location);
             ps.setString(5, description);
             ps.setString(6, organizerID);
             ps.executeUpdate();
-            return "Event created successfully";
+            return "Event created successfully with ID: " + eventId;
         } catch (SQLException e) {
             e.printStackTrace();
             return "Event creation failed: Database error";
         }
     }
+
+
+    private int getNextEventId() {
+        String query = "SELECT COALESCE(MAX(CAST(event_id AS UNSIGNED)), 0) AS max_id FROM event";
+        try (PreparedStatement ps = connect.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt("max_id") + 1;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 1; // Start from 1 if no records exist
+    }
+
+
+
 
     // 2. View Organized Events
     public Vector<EventOrganizer> viewOrganizedEvent(String userID) {
@@ -285,4 +301,26 @@ public class EventOrganizer extends User{
     public String getOrganizer_id() {
         return organizer_id;
     }
+
+ // 12. View All Events (not just organized by the user)
+    public Vector<EventOrganizer> viewAllEvents() {
+        Vector<EventOrganizer> events = new Vector<>();
+        String query = "SELECT * FROM event"; // Get all events, regardless of organizer
+        try (PreparedStatement ps = connect.prepareStatement(query)) {
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                String eventID = rs.getString("event_id");
+                String eventName = rs.getString("event_name");
+                String eventDate = rs.getString("event_date");
+                String eventLocation = rs.getString("event_location");
+                String eventDescription = rs.getString("event_description");
+                String organizerID = rs.getString("organizer_id");
+                events.add(new EventOrganizer(eventID, eventName, eventDate, eventLocation, eventDescription, organizerID));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return events;
+    }
+
 }
